@@ -19,8 +19,8 @@ Options:
 | `-o, --outfile` | `crossings.geojson` | Output file; the extension selects the format (`.geojson`, `.sqlite`/`.spatialite`/`.db`) |
 | `-a, --angle` | `15.0` | Maximum angle in degrees to report |
 | `-p, --parallel` | `1.0` | Minimum angle in degrees to report; anything below counts as parallel/adjacent |
-| `-f, --filter` | (none) | Only process ways carrying one of these tag keys, comma separated |
-| `-x, --exclude` | (none) | Skip ways carrying one of these tag keys (also via inherited relation tags), comma separated |
+| `-f, --filter` | (none) | Only process ways carrying one of these tags, comma separated. An item is either a plain tag key (`boundary`) or a `key=value` pair (`man_made=pipeline`) |
+| `-x, --exclude` | (none) | Skip ways carrying one of these tags (plain key or `key=value` pair, also via inherited relation tags), comma separated |
 
 ### Examples
 

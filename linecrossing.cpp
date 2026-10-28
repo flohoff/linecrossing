@@ -180,6 +180,23 @@ static std::vector<std::string> split_keys(const std::string& keys) {
 	return out;
 }
 
+// filter items are either a plain tag key ("boundary") or a key=value pair ("man_made=pipeline")
+static bool tags_match(const osmium::TagList& tags, const std::vector<std::string>& items) {
+	for (const auto& tag : tags) {
+		for (const auto& item : items) {
+			const std::size_t eq = item.find('=');
+			if (eq == std::string::npos) {
+				if (item == tag.key()) {
+					return true;
+				}
+			} else if (item.compare(0, eq, tag.key()) == 0 && item.compare(eq + 1, std::string::npos, tag.value()) == 0) {
+				return true;
+			}
+		}
+	}
+	return false;
+}
+
 class LineIndex : public osmium::handler::Handler {
 
 	WayMetaMap* m_metas;
@@ -232,24 +249,13 @@ public:
 		}
 
 		if (!filter_keys.empty()) {
-			bool keep = false;
-			for (const auto& tag : way.tags()) {
-				if (std::find(filter_keys.begin(), filter_keys.end(), tag.key()) != filter_keys.end()) {
-					keep = true;
-					break;
-				}
-			}
-			if (!keep) {
+			if (!tags_match(way.tags(), filter_keys)) {
 				return;
 			}
 		}
-		if (!exclude_keys.empty()) {
-			for (const auto& tag : way.tags()) {
-				if (std::find(exclude_keys.begin(), exclude_keys.end(), tag.key()) != exclude_keys.end()) {
-					++num_excluded;
-					return;
-				}
-			}
+		if (!exclude_keys.empty() && tags_match(way.tags(), exclude_keys)) {
+			++num_excluded;
+			return;
 		}
 		if (m_excluded_ways && m_excluded_ways->count(way.id())) {
 			++num_excluded_rel;
@@ -555,16 +561,13 @@ int main(int argc, char* argv[]) {
 			}
 
 			void relation(const osmium::Relation& rel) {
-				for (const auto& tag : rel.tags()) {
-					if (std::find(m_keys.begin(), m_keys.end(), tag.key()) == m_keys.end()) {
-						continue;
+				if (!tags_match(rel.tags(), m_keys)) {
+					return;
+				}
+				for (const auto& member : rel.members()) {
+					if (member.type() == osmium::item_type::way) {
+						m_out.insert(member.positive_ref());
 					}
-					for (const auto& member : rel.members()) {
-						if (member.type() == osmium::item_type::way) {
-							m_out.insert(member.positive_ref());
-						}
-					}
-					break;
 				}
 			}
 		};
