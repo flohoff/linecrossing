@@ -75,10 +75,10 @@ Processing is done in up to three passes over the input file:
   uid, changeset and last modified timestamp only for those ways, keeping the memory
   footprint independent of the number of tagged ways.
 
-The reported crossings are written as Point features to a GeoJSON FeatureCollection.
-Each feature contains the crossing point, the angle in the property `angle_deg` and a
-`way1`/`way2` object with the OSM way id, user name, uid, changeset id, last modified
-timestamp and all tags of the two ways involved.
+The reported crossings are written as LineString features to a GeoJSON FeatureCollection.
+The geometry is the shorter of the two crossing way segments. Each feature contains the
+angle in the property `angle_deg` and a `way1`/`way2` object with the OSM way id, user
+name, uid, changeset id, last modified timestamp and all tags of the two ways involved.
 
 Memory usage scales mainly with the number of segments (~134 bytes each in the R-tree),
 so country wide extracts like Germany need plenty of RAM (rough estimate: 50 GB+ for

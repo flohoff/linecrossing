@@ -79,8 +79,12 @@ struct WayNodes {
 struct Crossing {
 	std::uint64_t way1;
 	std::uint64_t way2;
-	double x;
+	double x;      // intersection point, used for dedup only
 	double y;
+	double sx1;    // shorter of the two crossing segments, written as geometry
+	double sy1;
+	double sx2;
+	double sy2;
 	double angle;
 };
 
@@ -306,7 +310,16 @@ public:
 					++num_nodeskip;
 					continue;
 				}
-				const Crossing c{ways[way_idx].id, ways[t.way].id, ix, iy, angle};
+				// report the shorter of the two crossing segments as geometry
+				const auto len2 = [](const Segment& seg) {
+					const double dx = seg.x2 - seg.x1;
+					const double dy = seg.y2 - seg.y1;
+					// longitude compression is irrelevant for the length comparison
+					return dx * dx + dy * dy;
+				};
+				const Segment& shorter = len2(s) <= len2(t) ? s : t;
+				const Crossing c{ways[way_idx].id, ways[t.way].id, ix, iy,
+					shorter.x1, shorter.y1, shorter.x2, shorter.y2, angle};
 				if (!crossings_set.insert(crossing_key(c)).second) {
 					continue;
 				}
@@ -356,8 +369,11 @@ static void write_geojson(const char* outfile, const std::vector<Crossing>& cros
 		feature["type"] = "Feature";
 		// OSM coordinates carry at most 7 decimals (lon/lat * 1e7 in the OSM database)
 		feature["geometry"] = json{
-			{"type", "Point"},
-			{"coordinates", {std::llround(c.x * 1e7) / 1e7, std::llround(c.y * 1e7) / 1e7}}
+			{"type", "LineString"},
+			{"coordinates", {
+				{std::llround(c.sx1 * 1e7) / 1e7, std::llround(c.sy1 * 1e7) / 1e7},
+				{std::llround(c.sx2 * 1e7) / 1e7, std::llround(c.sy2 * 1e7) / 1e7}
+			}}
 		};
 		feature["properties"] = json{
 			{"angle_deg", std::llround(c.angle * 100) / 100.0},
