@@ -15,7 +15,7 @@ buildstabletrixie:
   script:
     - apt-get update && apt-get -fuy install git
     - git clone ${GIT_BASE}/mirror/osmcode/libosmium.git --branch ${LIBOSMIUM_STABLE_VERSION} \
-    - git clone ${GIT_BASE}/mirror/nlohmann-json nlohmann-json --branch ${NLOHMANN_STABLE_VERSION} \
+    - git clone ${GIT_BASE}/mirror/nlohmann-json --branch ${NLOHMANN_STABLE_VERSION} \
     - git clone ${GIT_BASE}/mirror/protozero --branch ${PROTOZERO_STABLE_VERSION} \
     - apt-get update
     - apt-get install -fuy build-essential cmake cmake-data libboost-all-dev libgdal-dev libbz2-dev libexpat1-dev
