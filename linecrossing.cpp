@@ -354,12 +354,13 @@ static void write_geojson(const char* outfile, const std::vector<Crossing>& cros
 		const auto& c = crossings[i];
 		json feature;
 		feature["type"] = "Feature";
+		// OSM coordinates carry at most 7 decimals (lon/lat * 1e7 in the OSM database)
 		feature["geometry"] = json{
 			{"type", "Point"},
-			{"coordinates", {c.x, c.y}}
+			{"coordinates", {std::llround(c.x * 1e7) / 1e7, std::llround(c.y * 1e7) / 1e7}}
 		};
 		feature["properties"] = json{
-			{"angle_deg", c.angle},
+			{"angle_deg", std::llround(c.angle * 100) / 100.0},
 			{"way1", way_meta_json(c.way1, metas.count(c.way1) ? &metas.at(c.way1) : nullptr)},
 			{"way2", way_meta_json(c.way2, metas.count(c.way2) ? &metas.at(c.way2) : nullptr)}
 		};
