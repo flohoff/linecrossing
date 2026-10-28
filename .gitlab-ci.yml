@@ -26,6 +26,7 @@ buildpackagestrixie:
   image: amd64/debian:trixie
   stage: build
   script:
+    - apt-get update
     - apt-get install --no-install-suggests --no-install-recommends -fuy build-essential cmake cmake-data libboost-all-dev libgdal-dev libbz2-dev libexpat1-dev libosmium2-dev libprotozero-dev nlohmann-json3-dev
     - mkdir build
     - ( cd build ; cmake .. )
