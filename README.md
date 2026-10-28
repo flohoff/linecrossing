@@ -100,6 +100,13 @@ options reduce the number of segments and therefore both memory and runtime.
 
 ## Build
 
+The libosmium find modules (`FindOsmium.cmake`, `FindProtozero.cmake`,
+`FindLZ4.cmake`) are part of the project in `cmake/`, as is `FindNlohmannJSON.cmake`.
+libosmium, protozero and nlohmann-json are header-only and can be installed as system
+packages or checked out in this directory or next to it (`../libosmium` etc.).
+Additionally cmake packages for `Boost` (program_options) and `SQLite3` are needed,
+plus the osmium reader libraries (`zlib`, `bzip2`, `expat`, `lz4`).
+
 ```
 cmake .
 make
