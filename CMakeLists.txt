@@ -19,7 +19,7 @@ else()
 endif()
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
-find_package(Osmium REQUIRED COMPONENTS io gda)
+find_package(Osmium REQUIRED COMPONENTS io gdal)
 
 find_package(Boost CONFIG 1.70.0 REQUIRED COMPONENTS program_options )
 find_package(nlohmann_json 3.11 REQUIRED)
