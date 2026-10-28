@@ -112,4 +112,11 @@ cmake .
 make
 ```
 
+## Copyright
+
+Copyright 2026 - Florian Lohoff <f@zz.de>
+
+As this tool has mostly been "created" by an LLM i would consider this all be mostly
+non copyrightable in most jurisdications. In doubt i put all my contributions under the
+Creative Commons CC0.
 
