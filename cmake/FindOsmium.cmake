@@ -55,9 +55,8 @@
 
 # This is the list of directories where we look for osmium includes.
 set(_osmium_include_path
-        ../libosmium
-        ~/Library/Frameworks
-        /Library/Frameworks
+        ${CMAKE_SOURCE_DIR}/libosmium
+        ${CMAKE_SOURCE_DIR}/../libosmium
         /opt/local # DarwinPorts
         /opt
 )
