@@ -13,7 +13,7 @@ buildstabletrixie:
     GIT_BASE: https://gitlab-ci-token:${CI_JOB_TOKEN}@gl.zz.de
   script:
     - apt-get update
-    - apt-get install --no-install-suggests --no-install-recommends -fuy git
+    - apt-get install --no-install-suggests --no-install-recommends -fuy git ca-certificates
     - git clone ${GIT_BASE}/mirror/osmcode/libosmium.git --branch ${LIBOSMIUM_STABLE_VERSION}
     - git clone ${GIT_BASE}/mirror/nlohmann-json --branch ${NLOHMANN_STABLE_VERSION}
     - git clone ${GIT_BASE}/mirror/protozero --branch ${PROTOZERO_STABLE_VERSION}
@@ -40,7 +40,7 @@ buildlatesttrixie:
     GIT_BASE: https://gitlab-ci-token:${CI_JOB_TOKEN}@gl.zz.de
   script:
     - apt-get update
-    - apt-get install --no-install-suggests --no-install-recommends -fuy git
+    - apt-get install --no-install-suggests --no-install-recommends -fuy git ca-certificates
     - git clone ${GIT_BASE}/mirror/libosmium
     - git clone ${GIT_BASE}/mirror/nlohmann-json json
     - git clone ${GIT_BASE}/mirror/protozero
@@ -57,7 +57,7 @@ buildlatestsid:
     GIT_BASE: https://gitlab-ci-token:${CI_JOB_TOKEN}@gl.zz.de
   script:
     - apt-get update
-    - apt-get install --no-install-suggests --no-install-recommends -fuy git
+    - apt-get install --no-install-suggests --no-install-recommends -fuy git ca-certificates
     - git clone ${GIT_BASE}/mirror/libosmium
     - git clone ${GIT_BASE}/mirror/nlohmann-json json
     - git clone ${GIT_BASE}/mirror/protozero
