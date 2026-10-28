@@ -23,10 +23,11 @@ find_package(Osmium REQUIRED COMPONENTS io gda)
 
 find_package(Boost CONFIG 1.70.0 REQUIRED COMPONENTS program_options )
 find_package(nlohmann_json 3.11 REQUIRED)
+find_package(SQLite3 REQUIRED)
 include_directories(${Boost_INCLUDE_DIRS})
 
 add_executable(linecrossing linecrossing.cpp)
 include_directories("${OSMIUM_INCLUDE_DIRS}")
 include_directories(${Boost_INCLUDE_DIRS})
-target_link_libraries(linecrossing ${OSMIUM_LIBRARIES} ${Boost_LIBRARIES} nlohmann_json::nlohmann_json)
+target_link_libraries(linecrossing ${OSMIUM_LIBRARIES} ${Boost_LIBRARIES} nlohmann_json::nlohmann_json SQLite::SQLite3)
 

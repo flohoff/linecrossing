@@ -16,7 +16,7 @@ Options:
 | Option | Default | Description |
 | ------ | ------- | ----------- |
 | `-i, --infile` | (required) | OSM input file (.pbf or any other osmium format) |
-| `-o, --outfile` | `crossings.geojson` | GeoJSON output file |
+| `-o, --outfile` | `crossings.geojson` | Output file; the extension selects the format (`.geojson`, `.sqlite`/`.spatialite`/`.db`) |
 | `-a, --angle` | `15.0` | Maximum angle in degrees to report |
 | `-p, --parallel` | `1.0` | Minimum angle in degrees to report; anything below counts as parallel/adjacent |
 | `-f, --filter` | (none) | Only process ways carrying one of these tag keys, comma separated |
@@ -41,6 +41,12 @@ Only look at roads and railways in the angle window 2-5°:
 
 ```
 ./linecrossing -i kreisgt.pbf -f highway,railway -a 5 -p 2
+```
+
+Write the result to a SpatiaLite database instead of GeoJSON:
+
+```
+./linecrossing -i kreisgt.pbf -x boundary,power -o kreisgt-crossings.sqlite
 ```
 
 ## How it works
@@ -79,6 +85,13 @@ The reported crossings are written as LineString features to a GeoJSON FeatureCo
 The geometry is the shorter of the two crossing way segments. Each feature contains the
 angle in the property `angle_deg` and a `way1`/`way2` object with the OSM way id, user
 name, uid, changeset id, last modified timestamp and all tags of the two ways involved.
+
+As an alternative to GeoJSON the crossings can be written to a SpatiaLite database by
+choosing a `.sqlite` output file name. The table `crossings` holds the LineString in the
+`geom` geometry column (SRID 4326, with spatial index), the angle in the `angle_deg`
+column, both way ids in own columns for filtering and the full way properties as JSON
+in the `props` column. Reading such a database requires loading the SpatiaLite
+extension first, e.g. `SELECT load_extension('mod_spatialite');`
 
 Memory usage scales mainly with the number of segments (~134 bytes each in the R-tree),
 so country wide extracts like Germany need plenty of RAM (rough estimate: 50 GB+ for

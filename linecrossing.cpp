@@ -1,4 +1,5 @@
 #include <algorithm>
+#include <cctype>
 #include <chrono>
 #include <cmath>
 #include <cstdint>
@@ -34,6 +35,7 @@
 
 #include <boost/program_options.hpp>
 #include <nlohmann/json.hpp>
+#include <sqlite3.h>
 
 // The type of index used. This must match the include file above
 using index_type = osmium::index::map::FlexMem<osmium::unsigned_object_id_type, osmium::Location>;
@@ -354,6 +356,29 @@ static json way_meta_json(std::uint64_t way_id, const WayMeta* wm) {
 	return j;
 }
 
+static const WayMeta* meta_of(const WayMetaMap& metas, std::uint64_t way_id) {
+	const auto it = metas.find(way_id);
+	return it == metas.end() ? nullptr : &it->second;
+}
+
+// LineString geometry of the crossing, coordinates rounded to the OSM grid (1e7)
+static json geometry_json(const Crossing& c) {
+	return json{
+		{"type", "LineString"},
+		{"coordinates", {
+			{std::llround(c.sx1 * 1e7) / 1e7, std::llround(c.sy1 * 1e7) / 1e7},
+			{std::llround(c.sx2 * 1e7) / 1e7, std::llround(c.sy2 * 1e7) / 1e7}
+		}}
+	};
+}
+
+static json properties_json(const Crossing& c, const WayMetaMap& metas) {
+	return json{
+		{"way1", way_meta_json(c.way1, meta_of(metas, c.way1))},
+		{"way2", way_meta_json(c.way2, meta_of(metas, c.way2))}
+	};
+}
+
 // FeatureCollection header/trailer are streamed, one feature per line,
 // so arbitrarily large crossing sets never buffer up in memory
 static void write_geojson(const char* outfile, const std::vector<Crossing>& crossings, const WayMetaMap& metas) {
@@ -367,22 +392,111 @@ static void write_geojson(const char* outfile, const std::vector<Crossing>& cros
 		const auto& c = crossings[i];
 		json feature;
 		feature["type"] = "Feature";
-		// OSM coordinates carry at most 7 decimals (lon/lat * 1e7 in the OSM database)
-		feature["geometry"] = json{
-			{"type", "LineString"},
-			{"coordinates", {
-				{std::llround(c.sx1 * 1e7) / 1e7, std::llround(c.sy1 * 1e7) / 1e7},
-				{std::llround(c.sx2 * 1e7) / 1e7, std::llround(c.sy2 * 1e7) / 1e7}
-			}}
-		};
+		feature["geometry"] = geometry_json(c);
 		feature["properties"] = json{
 			{"angle_deg", std::llround(c.angle * 100) / 100.0},
-			{"way1", way_meta_json(c.way1, metas.count(c.way1) ? &metas.at(c.way1) : nullptr)},
-			{"way2", way_meta_json(c.way2, metas.count(c.way2) ? &metas.at(c.way2) : nullptr)}
+			{"way1", way_meta_json(c.way1, meta_of(metas, c.way1))},
+			{"way2", way_meta_json(c.way2, meta_of(metas, c.way2))}
 		};
 		out << feature.dump() << (i + 1 < crossings.size() ? ",\n" : "\n");
 	}
 	out << "]}\n";
+}
+
+static void sqlite_fail(sqlite3* db, const char* what) {
+	std::cerr << "SQLite error (" << what << "): " << (db ? sqlite3_errmsg(db) : "no database") << '\n';
+	std::exit(1);
+}
+
+class SqliteWriter {
+
+	sqlite3* db = nullptr;
+	sqlite3_stmt* stmt = nullptr;
+
+	void exec(const char* sql, const char* what) {
+		char* err = nullptr;
+		if (sqlite3_exec(db, sql, nullptr, nullptr, &err) != SQLITE_OK) {
+			std::cerr << "SQLite error (" << what << "): " << (err ? err : sqlite3_errmsg(db)) << '\n';
+			std::exit(1);
+		}
+		sqlite3_free(err);
+	}
+
+public:
+	SqliteWriter(const char* path) {
+		std::remove(path); // overwrite like the GeoJSON writer does
+		if (sqlite3_open(path, &db) != SQLITE_OK) {
+			sqlite_fail(db, "open");
+		}
+		sqlite3_enable_load_extension(db, 1);
+		if (sqlite3_exec(db, "SELECT load_extension('mod_spatialite');", nullptr, nullptr, nullptr) != SQLITE_OK) {
+			std::cerr << "Error: cannot load mod_spatialite (" << sqlite3_errmsg(db) << ")\n";
+			std::exit(1);
+		}
+		exec("SELECT InitSpatialMetaData(1);", "init spatial metadata");
+		exec("PRAGMA trusted_schema=ON;", "pragma"); // needed for spatialite GeometryConstraints() on SQLite >= 3.37
+		exec("PRAGMA synchronous=OFF", "pragma");
+		exec("CREATE TABLE crossings ("
+		     "fid INTEGER PRIMARY KEY AUTOINCREMENT, "
+		     "angle_deg REAL NOT NULL, "
+		     "way1_id INTEGER NOT NULL, "
+		     "way2_id INTEGER NOT NULL, "
+		     "props TEXT NOT NULL)", "create table");
+		exec("SELECT AddGeometryColumn('crossings','geom',4326,'LINESTRING','XY');", "add geometry column");
+		exec("SELECT CreateSpatialIndex('crossings','geom');", "create spatial index");
+		const char* sql = "INSERT INTO crossings (angle_deg,way1_id,way2_id,props,geom) "
+		                  "VALUES (?,?,?,?,SetSRID(GeomFromGeoJSON(?),4326));";
+		if (sqlite3_prepare_v2(db, sql, -1, &stmt, nullptr) != SQLITE_OK) {
+			sqlite_fail(db, "prepare insert");
+		}
+		exec("BEGIN", "begin transaction");
+	}
+
+	void add(const Crossing& c, const WayMetaMap& metas) {
+		const json props = properties_json(c, metas);
+		const json geom = geometry_json(c);
+		if (sqlite3_reset(stmt) != SQLITE_OK) {
+			sqlite_fail(db, "reset insert");
+		}
+		sqlite3_bind_double(stmt, 1, std::llround(c.angle * 100) / 100.0);
+		sqlite3_bind_int64(stmt, 2, static_cast<sqlite3_int64>(c.way1));
+		sqlite3_bind_int64(stmt, 3, static_cast<sqlite3_int64>(c.way2));
+		sqlite3_bind_text(stmt, 4, props.dump().c_str(), -1, SQLITE_TRANSIENT);
+		sqlite3_bind_text(stmt, 5, geom.dump().c_str(), -1, SQLITE_TRANSIENT);
+		if (sqlite3_step(stmt) != SQLITE_DONE) {
+			sqlite_fail(db, "insert");
+		}
+	}
+
+	~SqliteWriter() {
+		if (stmt) {
+			sqlite3_finalize(stmt);
+		}
+		if (db) {
+			exec("COMMIT", "commit transaction");
+			sqlite3_close(db);
+		}
+	}
+};
+
+static void write_spatialite(const char* outfile, const std::vector<Crossing>& crossings, const WayMetaMap& metas) {
+	SqliteWriter writer{outfile};
+	for (const auto& c : crossings) {
+		writer.add(c, metas);
+	}
+}
+
+// output format is selected by the outfile extension
+static bool ends_with_ci(const std::string& s, const std::string& suffix) {
+	if (s.size() < suffix.size()) {
+		return false;
+	}
+	for (std::size_t i = 0; i < suffix.size(); ++i) {
+		if (std::tolower(static_cast<unsigned char>(s[s.size() - suffix.size() + i])) != suffix[i]) {
+			return false;
+		}
+	}
+	return true;
 }
 
 int main(int argc, char* argv[]) {
@@ -505,7 +619,14 @@ int main(int argc, char* argv[]) {
 	}
 	metas.rehash(metas.size() * 2); // reclaim slack, cheap since tiny
 
-	write_geojson(outfile.c_str(), lineindex.crossings, metas);
+	if (ends_with_ci(outfile, ".geojson")) {
+		write_geojson(outfile.c_str(), lineindex.crossings, metas);
+	} else if (ends_with_ci(outfile, ".sqlite") || ends_with_ci(outfile, ".spatialite") || ends_with_ci(outfile, ".db")) {
+		write_spatialite(outfile.c_str(), lineindex.crossings, metas);
+	} else {
+		std::cerr << "Error: unknown output format for " << outfile << " (use .geojson or .sqlite)\n";
+		std::exit(EXIT_FAILURE);
+	}
 
 	const auto write_done = std::chrono::steady_clock::now();
 	const auto secs = [](std::chrono::steady_clock::time_point a, std::chrono::steady_clock::time_point b) {
