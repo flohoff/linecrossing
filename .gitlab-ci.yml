@@ -6,7 +6,7 @@ variables:
   PROTOZERO_STABLE_VERSION: v1.8.2
   DEBIAN_FRONTEND: "noninteractive"
 
-buildstabletrixie:
+build:trixie:git:stable:
   image: amd64/debian:trixie
   stage: build
   variables:
@@ -23,7 +23,7 @@ buildstabletrixie:
     - ( cd build ; cmake .. )
     - make -C build
 
-buildpackagestrixie:
+build:trixie:packages:
   image: amd64/debian:trixie
   stage: build
   script:
@@ -33,7 +33,7 @@ buildpackagestrixie:
     - ( cd build ; cmake .. )
     - make -C build
 
-buildlatesttrixie:
+build:trixie:git:latest:
   image: amd64/debian:trixie
   stage: build
   variables:
@@ -50,7 +50,17 @@ buildlatesttrixie:
     - ( cd build ; cmake .. )
     - make -C build
 
-buildlatestsid:
+build:sid:packages:
+  image: amd64/debian:sid
+  stage: build
+  script:
+    - apt-get update
+    - apt-get install --no-install-suggests --no-install-recommends -fuy build-essential cmake cmake-data libboost-program-options-dev zlib1g-dev libbz2-dev libexpat1-dev liblz4-dev libosmium2-dev libprotozero-dev nlohmann-json3-dev libspatialite-dev
+    - mkdir build
+    - ( cd build ; cmake .. )
+    - make -C build
+
+build:sid:git:latest:
   image: amd64/debian:sid
   stage: build
   variables:
