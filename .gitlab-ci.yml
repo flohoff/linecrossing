@@ -1,0 +1,60 @@
+---
+
+variables:
+  LIBOSMIUM_STABLE_VERSION: v2.23.1
+  NLOHMANN_STABLE_VERSION: v3.11.3
+  PROTOZERO_STABLE_VERSION: v1.8.2
+
+buildstabletrixie:
+  image: amd64/debian:trixie
+  stage: build
+  variables:
+    DEBIAN_FRONTEND: "noninteractive"
+    GIT_SUBMODULE_STRATEGY: recursive
+    GIT_BASE: https://gitlab-ci-token:${CI_JOB_TOKEN}@gl.zz.de
+  script:
+    - apt-get update && apt-get -fuy install git
+    - git clone ${GIT_BASE}/mirror/osmcode/libosmium && git -C libosmium checkout -b build $LIBOSMIUM_STABLE_VERSION
+    - git clone ${GIT_BASE}/mirror/nlohmann-json json && git -C json checkout -b build $NLOHMANN_STABLE_VERSION
+    - git clone ${GIT_BASE}/mirror/protozero && git -C protozero checkout -b build $PROTOZERO_STABLE_VERSION
+    - apt-get update
+    - apt-get install -fuy build-essential cmake cmake-data libboost-all-dev libgdal-dev libbz2-dev libexpat1-dev
+    - mkdir build
+    - ( cd build ; cmake .. )
+    - make -C build
+
+buildlatesttrixie:
+  image: amd64/debian:trixie
+  stage: build
+  variables:
+    DEBIAN_FRONTEND: "noninteractive"
+    GIT_SUBMODULE_STRATEGY: recursive
+    GIT_BASE: https://gitlab-ci-token:${CI_JOB_TOKEN}@gl.zz.de
+  script:
+    - apt-get update && apt-get -fuy install git
+    - git clone ${GIT_BASE}/mirror/libosmium
+    - git clone ${GIT_BASE}/mirror/nlohmann-json json
+    - git clone ${GIT_BASE}/mirror/protozero
+    - apt-get update
+    - apt-get install -fuy build-essential cmake cmake-data libboost-all-dev libgdal-dev libbz2-dev libexpat1-dev
+    - mkdir build
+    - ( cd build ; cmake .. )
+    - make -C build
+
+buildlatestsid:
+  image: amd64/debian:sid
+  stage: build
+  variables:
+    DEBIAN_FRONTEND: "noninteractive"
+    GIT_SUBMODULE_STRATEGY: recursive
+    GIT_BASE: https://gitlab-ci-token:${CI_JOB_TOKEN}@gl.zz.de
+  script:
+    - apt-get update && apt-get -fuy install git
+    - git clone ${GIT_BASE}/mirror/libosmium
+    - git clone ${GIT_BASE}/mirror/nlohmann-json json
+    - git clone ${GIT_BASE}/mirror/protozero
+    - apt-get update
+    - apt-get install -fuy build-essential cmake cmake-data libboost-all-dev libgdal-dev libbz2-dev libexpat1-dev
+    - mkdir build
+    - ( cd build ; cmake .. )
+    - make -C build
