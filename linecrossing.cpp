@@ -33,6 +33,7 @@
 #include <boost/geometry/index/rtree.hpp>
 
 #include <boost/program_options.hpp>
+#include <nlohmann/json.hpp>
 
 // The type of index used. This must match the include file above
 using index_type = osmium::index::map::FlexMem<osmium::unsigned_object_id_type, osmium::Location>;
@@ -320,55 +321,28 @@ private:
 	std::unordered_set<std::uint64_t> crossings_set;
 };
 
-static void json_string(std::ostream& out, const std::string& s) {
-	out << '"';
-	for (const unsigned char c : s) {
-		switch (c) {
-			case '"':  out << "\\\""; break;
-			case '\\': out << "\\\\"; break;
-			case '\b': out << "\\b";  break;
-			case '\f': out << "\\f";  break;
-			case '\n': out << "\\n";  break;
-			case '\r': out << "\\r";  break;
-			case '\t': out << "\\t";  break;
-			default:
-				if (c < 0x20) {
-					char buf[8];
-					std::snprintf(buf, sizeof(buf), "\\u%04x", c);
-					out << buf;
-				} else {
-					out << static_cast<char>(c);
-				}
-		}
-	}
-	out << '"';
-}
+using json = nlohmann::ordered_json;
 
-static void write_way_meta(std::ostream& out, std::uint64_t way_id, const WayMeta* wm) {
-	out << "{\"id\":" << way_id;
+// Build one feature's way object; all string escaping is done by nlohmann json
+static json way_meta_json(std::uint64_t way_id, const WayMeta* wm) {
+	json j;
+	j["id"] = way_id;
 	if (wm) {
-		out << ",\"user\":";
-		json_string(out, wm->user);
-		out << ",\"uid\":" << wm->uid;
-		out << ",\"changeset\":" << wm->changeset;
-		out << ",\"last_modified\":";
-		json_string(out, wm->timestamp);
-		out << ",\"tags\":{";
-		bool first = true;
+		j["user"] = wm->user;
+		j["uid"] = wm->uid;
+		j["changeset"] = wm->changeset;
+		j["last_modified"] = wm->timestamp;
+		json tags = json::object();
 		for (const auto& kv : wm->tags) {
-			if (!first) {
-				out << ',';
-			}
-			first = false;
-			json_string(out, kv.first);
-			out << ':';
-			json_string(out, kv.second);
+			tags[kv.first] = kv.second;
 		}
-		out << '}';
+		j["tags"] = std::move(tags);
 	}
-	out << '}';
+	return j;
 }
 
+// FeatureCollection header/trailer are streamed, one feature per line,
+// so arbitrarily large crossing sets never buffer up in memory
 static void write_geojson(const char* outfile, const std::vector<Crossing>& crossings, const WayMetaMap& metas) {
 	std::ofstream out(outfile);
 	if (!out) {
@@ -378,20 +352,18 @@ static void write_geojson(const char* outfile, const std::vector<Crossing>& cros
 	out << "{\"type\":\"FeatureCollection\",\"features\":[\n";
 	for (std::size_t i = 0; i < crossings.size(); ++i) {
 		const auto& c = crossings[i];
-		const auto it1 = metas.find(c.way1);
-		const auto it2 = metas.find(c.way2);
-		char buf[256];
-		std::snprintf(buf, sizeof(buf), "%.7f", c.x);
-		std::snprintf(buf + 128, 128, "%.7f", c.y);
-		out << "{\"type\":\"Feature\",\"geometry\":{\"type\":\"Point\",\"coordinates\":["
-		    << buf << ',' << buf + 128
-		    << "]},\"properties\":{\"angle_deg\":" << c.angle
-		    << ",\"way1\":";
-		write_way_meta(out, c.way1, it1 == metas.end() ? nullptr : &it1->second);
-		out << ",\"way2\":";
-		write_way_meta(out, c.way2, it2 == metas.end() ? nullptr : &it2->second);
-		out << "}}";
-		out << (i + 1 < crossings.size() ? ",\n" : "\n");
+		json feature;
+		feature["type"] = "Feature";
+		feature["geometry"] = json{
+			{"type", "Point"},
+			{"coordinates", {c.x, c.y}}
+		};
+		feature["properties"] = json{
+			{"angle_deg", c.angle},
+			{"way1", way_meta_json(c.way1, metas.count(c.way1) ? &metas.at(c.way1) : nullptr)},
+			{"way2", way_meta_json(c.way2, metas.count(c.way2) ? &metas.at(c.way2) : nullptr)}
+		};
+		out << feature.dump() << (i + 1 < crossings.size() ? ",\n" : "\n");
 	}
 	out << "]}\n";
 }
