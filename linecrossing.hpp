@@ -168,6 +168,15 @@ inline double acute_angle(const Segment& s, const Segment& t, double at_y) {
 inline bool ways_share_node(const WayNodes& a, const WayNodes& b) {
 	const WayNodes& small = a.nodes.size() <= b.nodes.size() ? a : b;
 	const WayNodes& big   = a.nodes.size() <= b.nodes.size() ? b : a;
+	// short ways: plain scan beats building a hash set
+	if (small.nodes.size() * big.nodes.size() <= 1024) {
+		for (const auto n : small.nodes) {
+			if (std::find(big.nodes.begin(), big.nodes.end(), n) != big.nodes.end()) {
+				return true;
+			}
+		}
+		return false;
+	}
 	std::unordered_set<std::uint64_t> set{small.nodes.begin(), small.nodes.end()};
 	for (const auto n : big.nodes) {
 		if (set.count(n)) {

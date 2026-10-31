@@ -219,6 +219,18 @@ TEST_CASE("ways_share_node", "[geometry]") {
 	CHECK(ways_share_node(WayNodes{4, {10}}, c)); // small side hit in the big side
 	CHECK(ways_share_node(c, WayNodes{4, {10}}));
 	CHECK(ways_share_node(WayNodes{5, {1, 2, 3}}, WayNodes{6, {1, 2, 3}})); // equal sizes
+	SECTION("long ways use the hash set path") {
+		WayNodes l1{10, {}};
+		WayNodes l2{11, {}};
+		for (std::uint64_t i = 0; i < 100; ++i) {
+			l1.nodes.push_back(1000 + i);
+			l2.nodes.push_back(2000 + i);
+		}
+		CHECK_FALSE(ways_share_node(l1, l2));
+		l2.nodes.push_back(1099);
+		CHECK(ways_share_node(l1, l2));
+		CHECK(ways_share_node(l2, l1));
+	}
 	CHECK_FALSE(ways_share_node(WayNodes{}, a));
 	CHECK_FALSE(ways_share_node(a, WayNodes{}));
 }
