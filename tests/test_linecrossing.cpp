@@ -20,9 +20,17 @@ namespace {
 
 const std::string kData = std::string(TEST_DATA_DIR) + "/crossings.osm.xml";
 
-std::string tmp_path(const std::string& name) {
-	return (std::filesystem::temp_directory_path() / ("linecrossing_test_" + name)).string();
-}
+// per-build scratch dir; removed again when the test ends, even if it fails
+struct TmpFile {
+	std::string path;
+	explicit TmpFile(const std::string& name) : path(std::string(TEST_TMP_DIR) + "/" + name) {
+		std::filesystem::create_directories(TEST_TMP_DIR);
+		std::filesystem::remove(path);
+	}
+	~TmpFile() {
+		std::filesystem::remove(path);
+	}
+};
 
 json read_json(const std::string& path) {
 	std::ifstream in(path);
@@ -456,7 +464,8 @@ TEST_CASE("metadata only for involved ways", "[integration]") {
 
 TEST_CASE("write_geojson", "[output]") {
 	const auto res = run(Options{});
-	const std::string path = tmp_path("out.geojson");
+	const TmpFile tmp{"out.geojson"};
+	const std::string& path = tmp.path;
 	write_geojson(path.c_str(), res->lineindex.crossings, res->metas);
 	const json fc = read_json(path);
 
@@ -478,20 +487,20 @@ TEST_CASE("write_geojson", "[output]") {
 		}
 	}
 	CHECK(found);
-	std::filesystem::remove(path);
 }
 
 TEST_CASE("write_geojson with no crossings is valid", "[output]") {
-	const std::string path = tmp_path("empty.geojson");
+	const TmpFile tmp{"empty.geojson"};
+	const std::string& path = tmp.path;
 	write_geojson(path.c_str(), {}, {});
 	const json fc = read_json(path);
 	CHECK(fc["type"] == "FeatureCollection");
 	CHECK(fc["features"].empty());
-	std::filesystem::remove(path);
 }
 
 TEST_CASE("write_geojson separates features by commas", "[output]") {
-	const std::string path = tmp_path("lines.geojson");
+	const TmpFile tmp{"lines.geojson"};
+	const std::string& path = tmp.path;
 	const Crossing c{1, 2, 0, 0, 8, 52, 8.1, 52.1, 5};
 	write_geojson(path.c_str(), {c, c, c}, {});
 	std::ifstream in(path);
@@ -504,7 +513,6 @@ TEST_CASE("write_geojson separates features by commas", "[output]") {
 	CHECK(lines[1].back() == ',');
 	CHECK(lines[2].back() == ',');
 	CHECK(lines[3].back() == '}'); // last feature, no trailing comma
-	std::filesystem::remove(path);
 }
 
 namespace {
@@ -523,7 +531,8 @@ TEST_CASE("write_spatialite", "[output]") {
 		SKIP("mod_spatialite not available");
 	}
 	const auto res = run(Options{});
-	const std::string path = tmp_path("out.sqlite");
+	const TmpFile tmp{"out.sqlite"};
+	const std::string& path = tmp.path;
 	write_spatialite(path.c_str(), res->lineindex.crossings, res->metas);
 
 	sqlite3* db = nullptr;
@@ -548,14 +557,14 @@ TEST_CASE("write_spatialite", "[output]") {
 	CHECK(props.contains("way1"));
 	CHECK(props.contains("way2"));
 	sqlite3_close(db);
-	std::filesystem::remove(path);
 }
 
 TEST_CASE("write_spatialite overwrites an existing file", "[output]") {
 	if (!spatialite_available()) {
 		SKIP("mod_spatialite not available");
 	}
-	const std::string path = tmp_path("overwrite.sqlite");
+	const TmpFile tmp{"overwrite.sqlite"};
+	const std::string& path = tmp.path;
 	const Crossing c{1, 2, 0, 0, 8, 52, 8.1, 52.1, 5};
 	write_spatialite(path.c_str(), {c, c}, {});
 	write_spatialite(path.c_str(), {c}, {});
@@ -569,5 +578,4 @@ TEST_CASE("write_spatialite overwrites an existing file", "[output]") {
 	CHECK_THAT(sqlite3_column_double(st, 1), WithinAbs(5.0, 1e-9));
 	sqlite3_finalize(st);
 	sqlite3_close(db);
-	std::filesystem::remove(path);
 }

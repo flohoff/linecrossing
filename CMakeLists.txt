@@ -37,7 +37,7 @@ target_link_libraries(linecrossing ${OSMIUM_LIBRARIES} ${Boost_LIBRARIES} SQLite
 
 option(ENABLE_COVERAGE "Build with gcov/llvm-cov instrumentation" OFF)
 option(ENABLE_MULL "Build tests with the mull mutation testing plugin (needs clang)" OFF)
-option(BUILD_TESTING "Build unit tests" ON)
+option(BUILD_TESTING "Build unit tests (needs Catch2 3)" OFF)
 
 if(ENABLE_COVERAGE)
   target_compile_options(linecrossing PRIVATE --coverage -O0)

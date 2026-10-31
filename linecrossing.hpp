@@ -489,12 +489,19 @@ public:
 		}
 	}
 
+	void commit() {
+		exec("COMMIT", "commit transaction");
+	}
+
+	SqliteWriter(const SqliteWriter&) = delete;
+	SqliteWriter& operator=(const SqliteWriter&) = delete;
+
+	// uncommitted data is rolled back by close
 	~SqliteWriter() {
 		if (stmt) {
 			sqlite3_finalize(stmt);
 		}
 		if (db) {
-			exec("COMMIT", "commit transaction");
 			sqlite3_close(db);
 		}
 	}
@@ -505,6 +512,7 @@ inline void write_spatialite(const char* outfile, const std::vector<Crossing>& c
 	for (const auto& c : crossings) {
 		writer.add(c, metas);
 	}
+	writer.commit();
 }
 
 // output format is selected by the outfile extension

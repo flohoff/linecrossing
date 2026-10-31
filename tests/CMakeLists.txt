@@ -2,7 +2,8 @@ find_package(Catch2 3 REQUIRED)
 
 add_executable(unit_tests test_linecrossing.cpp)
 target_include_directories(unit_tests PRIVATE "${CMAKE_SOURCE_DIR}")
-target_compile_definitions(unit_tests PRIVATE TEST_DATA_DIR="${CMAKE_CURRENT_SOURCE_DIR}/data")
+target_compile_definitions(unit_tests PRIVATE TEST_DATA_DIR="${CMAKE_CURRENT_SOURCE_DIR}/data"
+  TEST_TMP_DIR="${CMAKE_CURRENT_BINARY_DIR}/tmp")
 target_link_libraries(unit_tests PRIVATE Catch2::Catch2WithMain ${OSMIUM_LIBRARIES} ${Boost_LIBRARIES} SQLite::SQLite3)
 
 if(ENABLE_COVERAGE)
@@ -20,16 +21,28 @@ if(ENABLE_MULL)
   target_compile_options(unit_tests PRIVATE -O0 -g -grecord-command-line -fpass-plugin=${MULL_PLUGIN})
 endif()
 
+# ctest does not build; make sure the binaries are current
+add_test(NAME build_all COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR} --target linecrossing unit_tests)
+set_tests_properties(build_all PROPERTIES FIXTURES_SETUP binaries)
+
 add_test(NAME unit_tests COMMAND unit_tests)
 
 set(XML "${CMAKE_CURRENT_SOURCE_DIR}/data/crossings.osm.xml")
-add_test(NAME cli_geojson COMMAND linecrossing -i ${XML} -o ${CMAKE_CURRENT_BINARY_DIR}/cli.geojson)
-add_test(NAME cli_filters COMMAND linecrossing -i ${XML} -o ${CMAKE_CURRENT_BINARY_DIR}/cli_f.geojson -f highway -x boundary)
+set(OUT "${CMAKE_CURRENT_BINARY_DIR}/tmp")
+file(MAKE_DIRECTORY ${OUT})
+add_test(NAME cli_geojson COMMAND linecrossing -i ${XML} -o ${OUT}/cli.geojson)
+add_test(NAME cli_filters COMMAND linecrossing -i ${XML} -o ${OUT}/cli_f.geojson -f highway -x boundary)
 add_test(NAME cli_bad_angle COMMAND linecrossing -i ${XML} -a 95)
 add_test(NAME cli_bad_parallel COMMAND linecrossing -i ${XML} -a 10 -p 10)
-add_test(NAME cli_bad_format COMMAND linecrossing -i ${XML} -o ${CMAKE_CURRENT_BINARY_DIR}/cli.txt)
+add_test(NAME cli_bad_format COMMAND linecrossing -i ${XML} -o ${OUT}/cli.txt)
 add_test(NAME cli_no_input COMMAND linecrossing)
-set_tests_properties(cli_bad_angle cli_bad_parallel cli_bad_format cli_no_input PROPERTIES WILL_FAIL TRUE)
+# the expected error text must show up (exit code alone would also pass on a crash)
+set_tests_properties(cli_bad_angle PROPERTIES PASS_REGULAR_EXPRESSION "angle threshold must be in")
+set_tests_properties(cli_bad_parallel PROPERTIES PASS_REGULAR_EXPRESSION "parallel tolerance must be in")
+set_tests_properties(cli_bad_format PROPERTIES PASS_REGULAR_EXPRESSION "unknown output format")
+set_tests_properties(cli_no_input PROPERTIES PASS_REGULAR_EXPRESSION "infile.*required")
+set_tests_properties(unit_tests cli_geojson cli_filters cli_bad_angle cli_bad_parallel cli_bad_format cli_no_input
+  PROPERTIES FIXTURES_REQUIRED binaries)
 
 if(ENABLE_COVERAGE)
   find_program(GCOVR gcovr)
