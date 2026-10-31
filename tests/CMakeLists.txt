@@ -49,7 +49,7 @@ if(ENABLE_COVERAGE)
   if(GCOVR)
     add_custom_target(coverage
       COMMAND ${CMAKE_COMMAND} -E env ${CMAKE_CTEST_COMMAND} --output-on-failure
-      COMMAND ${GCOVR} -r ${CMAKE_SOURCE_DIR} ${CMAKE_BINARY_DIR} --filter ".*/linecrossing\\.[ch]pp" --txt --html-details ${CMAKE_BINARY_DIR}/coverage.html
+      COMMAND ${GCOVR} -r ${CMAKE_SOURCE_DIR} ${CMAKE_BINARY_DIR} --filter "linecrossing\\.[ch]pp" --txt --html-details ${CMAKE_BINARY_DIR}/coverage.html
       WORKING_DIRECTORY ${CMAKE_BINARY_DIR})
   endif()
 endif()

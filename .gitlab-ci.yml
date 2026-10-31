@@ -38,11 +38,20 @@ test:trixie:packages:
   stage: test
   script:
     - apt-get update
-    - apt-get install --no-install-suggests --no-install-recommends -fuy build-essential cmake cmake-data libboost-program-options-dev zlib1g-dev libbz2-dev libexpat1-dev liblz4-dev libosmium2-dev libprotozero-dev nlohmann-json3-dev libspatialite-dev libsqlite3-mod-spatialite catch2
+    - apt-get install --no-install-suggests --no-install-recommends -fuy build-essential cmake cmake-data libboost-program-options-dev zlib1g-dev libbz2-dev libexpat1-dev liblz4-dev libosmium2-dev libprotozero-dev nlohmann-json3-dev libspatialite-dev libsqlite3-mod-spatialite catch2 gcovr
     - mkdir build
-    - ( cd build ; cmake -DCMAKE_BUILD_TYPE=Debug -DBUILD_TESTING=ON .. )
+    - ( cd build ; cmake -DCMAKE_BUILD_TYPE=Debug -DBUILD_TESTING=ON -DENABLE_COVERAGE=ON .. )
     - make -C build
-    - ( cd build ; ctest --output-on-failure )
+    - ( cd build ; ctest --output-on-failure --output-junit junit.xml )
+    - gcovr -r . build --filter 'linecrossing\.[ch]pp' --print-summary --cobertura build/coverage.xml
+  coverage: '/^lines: (\d+\.\d+)%/'
+  artifacts:
+    when: always
+    reports:
+      junit: build/junit.xml
+      coverage_report:
+        coverage_format: cobertura
+        path: build/coverage.xml
 
 build:trixie:git:latest:
   image: amd64/debian:trixie
