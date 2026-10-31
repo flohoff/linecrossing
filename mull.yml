@@ -1,0 +1,8 @@
+mutators:
+  - cxx_all
+includePaths:
+  - '.*/linecrossing\.hpp$'
+excludePaths:
+  - '.*/tests/.*'
+timeout: 10000
+quiet: false

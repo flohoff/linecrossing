@@ -18,7 +18,7 @@ build:trixie:git:stable:
     - git clone ${GIT_BASE}/mirror/nlohmann-json --branch ${NLOHMANN_STABLE_VERSION}
     - git clone ${GIT_BASE}/mirror/protozero --branch ${PROTOZERO_STABLE_VERSION}
     - apt-get update
-    - apt-get install --no-install-suggests --no-install-recommends -fuy build-essential cmake cmake-data libboost-program-options-dev zlib1g-dev libbz2-dev libexpat1-dev liblz4-dev libspatialite-dev
+    - apt-get install --no-install-suggests --no-install-recommends -fuy build-essential cmake cmake-data libboost-program-options-dev zlib1g-dev libbz2-dev libexpat1-dev liblz4-dev libspatialite-dev catch2
     - mkdir build
     - ( cd build ; cmake .. )
     - make -C build
@@ -28,10 +28,21 @@ build:trixie:packages:
   stage: build
   script:
     - apt-get update
-    - apt-get install --no-install-suggests --no-install-recommends -fuy build-essential cmake cmake-data libboost-program-options-dev zlib1g-dev libbz2-dev libexpat1-dev liblz4-dev libosmium2-dev libprotozero-dev nlohmann-json3-dev libspatialite-dev
+    - apt-get install --no-install-suggests --no-install-recommends -fuy build-essential cmake cmake-data libboost-program-options-dev zlib1g-dev libbz2-dev libexpat1-dev liblz4-dev libosmium2-dev libprotozero-dev nlohmann-json3-dev libspatialite-dev catch2
     - mkdir build
     - ( cd build ; cmake .. )
     - make -C build
+
+test:trixie:packages:
+  image: amd64/debian:trixie
+  stage: test
+  script:
+    - apt-get update
+    - apt-get install --no-install-suggests --no-install-recommends -fuy build-essential cmake cmake-data libboost-program-options-dev zlib1g-dev libbz2-dev libexpat1-dev liblz4-dev libosmium2-dev libprotozero-dev nlohmann-json3-dev libspatialite-dev libsqlite3-mod-spatialite catch2
+    - mkdir build
+    - ( cd build ; cmake -DCMAKE_BUILD_TYPE=Debug .. )
+    - make -C build
+    - ( cd build ; ctest --output-on-failure )
 
 build:trixie:git:latest:
   image: amd64/debian:trixie
@@ -45,7 +56,7 @@ build:trixie:git:latest:
     - git clone ${GIT_BASE}/mirror/nlohmann-json json
     - git clone ${GIT_BASE}/mirror/protozero
     - apt-get update
-    - apt-get install --no-install-suggests --no-install-recommends -fuy build-essential cmake cmake-data libboost-program-options-dev zlib1g-dev libbz2-dev libexpat1-dev liblz4-dev libspatialite-dev
+    - apt-get install --no-install-suggests --no-install-recommends -fuy build-essential cmake cmake-data libboost-program-options-dev zlib1g-dev libbz2-dev libexpat1-dev liblz4-dev libspatialite-dev catch2
     - mkdir build
     - ( cd build ; cmake .. )
     - make -C build
@@ -55,7 +66,7 @@ build:sid:packages:
   stage: build
   script:
     - apt-get update
-    - apt-get install --no-install-suggests --no-install-recommends -fuy build-essential cmake cmake-data libboost-program-options-dev zlib1g-dev libbz2-dev libexpat1-dev liblz4-dev libosmium2-dev libprotozero-dev nlohmann-json3-dev libspatialite-dev
+    - apt-get install --no-install-suggests --no-install-recommends -fuy build-essential cmake cmake-data libboost-program-options-dev zlib1g-dev libbz2-dev libexpat1-dev liblz4-dev libosmium2-dev libprotozero-dev nlohmann-json3-dev libspatialite-dev catch2
     - mkdir build
     - ( cd build ; cmake .. )
     - make -C build
@@ -72,7 +83,7 @@ build:sid:git:latest:
     - git clone ${GIT_BASE}/mirror/nlohmann-json json
     - git clone ${GIT_BASE}/mirror/protozero
     - apt-get update
-    - apt-get install --no-install-suggests --no-install-recommends -fuy build-essential cmake cmake-data libboost-program-options-dev zlib1g-dev libbz2-dev libexpat1-dev liblz4-dev libspatialite-dev
+    - apt-get install --no-install-suggests --no-install-recommends -fuy build-essential cmake cmake-data libboost-program-options-dev zlib1g-dev libbz2-dev libexpat1-dev liblz4-dev libspatialite-dev catch2
     - mkdir build
     - ( cd build ; cmake .. )
     - make -C build

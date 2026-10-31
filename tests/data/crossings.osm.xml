@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Synthetic test data for linecrossing, generated once; see tests/data/README.md -->
+<osm version="0.6" generator="handwritten">
+  <node id="1" lat="52.0000000" lon="7.9967515" version="1" timestamp="2024-05-01T12:00:00Z" uid="11" user="mapper" changeset="100"/>
+  <node id="2" lat="52.0000000" lon="8.0032485" version="1" timestamp="2024-05-01T12:00:00Z" uid="11" user="mapper" changeset="100"/>
+  <node id="3" lat="51.9996527" lon="7.9968008" version="1" timestamp="2024-05-01T12:00:00Z" uid="11" user="mapper" changeset="100"/>
+  <node id="4" lat="52.0003473" lon="8.0031992" version="1" timestamp="2024-05-01T12:00:00Z" uid="11" user="mapper" changeset="100"/>
+  <node id="5" lat="52.0000000" lon="8.0067515" version="1" timestamp="2024-05-01T12:00:00Z" uid="11" user="mapper" changeset="100"/>
+  <node id="6" lat="52.0000000" lon="8.0132485" version="1" timestamp="2024-05-01T12:00:00Z" uid="11" user="mapper" changeset="100"/>
+  <node id="7" lat="51.9985858" lon="8.0077029" version="1" timestamp="2024-05-01T12:00:00Z" uid="11" user="mapper" changeset="100"/>
+  <node id="8" lat="52.0014142" lon="8.0122971" version="1" timestamp="2024-05-01T12:00:00Z" uid="11" user="mapper" changeset="100"/>
+  <node id="9" lat="52.0000000" lon="8.0167515" version="1" timestamp="2024-05-01T12:00:00Z" uid="11" user="mapper" changeset="100"/>
+  <node id="10" lat="52.0000000" lon="8.0232485" version="1" timestamp="2024-05-01T12:00:00Z" uid="11" user="mapper" changeset="100"/>
+  <node id="11" lat="51.9999825" lon="8.0167516" version="1" timestamp="2024-05-01T12:00:00Z" uid="11" user="mapper" changeset="100"/>
+  <node id="12" lat="52.0000175" lon="8.0232484" version="1" timestamp="2024-05-01T12:00:00Z" uid="11" user="mapper" changeset="100"/>
+  <node id="13" lat="52.0000000" lon="8.0267515" version="1" timestamp="2024-05-01T12:00:00Z" uid="11" user="mapper" changeset="100"/>
+  <node id="14" lat="52.0000000" lon="8.0332485" version="1" timestamp="2024-05-01T12:00:00Z" uid="11" user="mapper" changeset="100"/>
+  <node id="15" lat="51.9996527" lon="8.0268008" version="1" timestamp="2024-05-01T12:00:00Z" uid="11" user="mapper" changeset="100"/>
+  <node id="16" lat="52.0003473" lon="8.0331992" version="1" timestamp="2024-05-01T12:00:00Z" uid="11" user="mapper" changeset="100"/>
+  <node id="17" lat="52.0000000" lon="8.0267515" version="1" timestamp="2024-05-01T12:00:00Z" uid="11" user="mapper" changeset="100"/>
+  <node id="18" lat="52.0000000" lon="8.0300000" version="1" timestamp="2024-05-01T12:00:00Z" uid="11" user="mapper" changeset="100"/>
+  <node id="19" lat="52.0000000" lon="8.0332485" version="1" timestamp="2024-05-01T12:00:00Z" uid="11" user="mapper" changeset="100"/>
+  <node id="20" lat="52.0003473" lon="8.0331992" version="1" timestamp="2024-05-01T12:00:00Z" uid="11" user="mapper" changeset="100"/>
+  <node id="21" lat="52.0000000" lon="8.0367515" version="1" timestamp="2024-05-01T12:00:00Z" uid="11" user="mapper" changeset="100"/>
+  <node id="22" lat="52.0000000" lon="8.0432485" version="1" timestamp="2024-05-01T12:00:00Z" uid="11" user="mapper" changeset="100"/>
+  <node id="23" lat="51.9996527" lon="8.0368008" version="1" timestamp="2024-05-01T12:00:00Z" uid="11" user="mapper" changeset="100"/>
+  <node id="24" lat="52.0003473" lon="8.0431992" version="1" timestamp="2024-05-01T12:00:00Z" uid="11" user="mapper" changeset="100"/>
+  <node id="25" lat="52.0000000" lon="8.0467515" version="1" timestamp="2024-05-01T12:00:00Z" uid="11" user="mapper" changeset="100"/>
+  <node id="26" lat="52.0000000" lon="8.0532485" version="1" timestamp="2024-05-01T12:00:00Z" uid="11" user="mapper" changeset="100"/>
+  <node id="27" lat="51.9996527" lon="8.0468008" version="1" timestamp="2024-05-01T12:00:00Z" uid="11" user="mapper" changeset="100"/>
+  <node id="28" lat="52.0003473" lon="8.0531992" version="1" timestamp="2024-05-01T12:00:00Z" uid="11" user="mapper" changeset="100"/>
+  <node id="29" lat="52.0000000" lon="8.0567515" version="1" timestamp="2024-05-01T12:00:00Z" uid="11" user="mapper" changeset="100"/>
+  <node id="30" lat="52.0000000" lon="8.0632485" version="1" timestamp="2024-05-01T12:00:00Z" uid="11" user="mapper" changeset="100"/>
+  <node id="31" lat="52.0001000" lon="8.0632485" version="1" timestamp="2024-05-01T12:00:00Z" uid="11" user="mapper" changeset="100"/>
+  <node id="32" lat="52.0001000" lon="8.0567515" version="1" timestamp="2024-05-01T12:00:00Z" uid="11" user="mapper" changeset="100"/>
+  <node id="33" lat="51.9999000" lon="8.0616243" version="1" timestamp="2024-05-01T12:00:00Z" uid="11" user="mapper" changeset="100"/>
+  <node id="34" lat="51.9996527" lon="8.0668008" version="1" timestamp="2024-05-01T12:00:00Z" uid="11" user="mapper" changeset="100"/>
+  <node id="35" lat="52.0000000" lon="8.0700000" version="1" timestamp="2024-05-01T12:00:00Z" uid="11" user="mapper" changeset="100"/>
+  <node id="36" lat="52.0003473" lon="8.0731992" version="1" timestamp="2024-05-01T12:00:00Z" uid="11" user="mapper" changeset="100"/>
+  <node id="37" lat="52.0000000" lon="8.0667515" version="1" timestamp="2024-05-01T12:00:00Z" uid="11" user="mapper" changeset="100"/>
+  <node id="38" lat="52.0000000" lon="8.0732485" version="1" timestamp="2024-05-01T12:00:00Z" uid="11" user="mapper" changeset="100"/>
+  <node id="39" lat="52.0000000" lon="8.0767515" version="1" timestamp="2024-05-01T12:00:00Z" uid="11" user="mapper" changeset="100"/>
+  <node id="40" lat="52.0000000" lon="8.0832485" version="1" timestamp="2024-05-01T12:00:00Z" uid="11" user="mapper" changeset="100"/>
+  <node id="41" lat="51.9996527" lon="8.0768008" version="1" timestamp="2024-05-01T12:00:00Z" uid="11" user="mapper" changeset="100"/>
+  <node id="42" lat="52.0003473" lon="8.0831992" version="1" timestamp="2024-05-01T12:00:00Z" uid="11" user="mapper" changeset="100"/>
+  <node id="43" lat="52.0000000" lon="8.0900000" version="1" timestamp="2024-05-01T12:00:00Z" uid="11" user="mapper" changeset="100"/>
+  <way id="1" version="1" timestamp="2024-05-01T12:00:00Z" uid="4711" user="Jörg &quot;J&quot; &lt;x&gt;" changeset="1001">
+    <nd ref="1"/>
+    <nd ref="2"/>
+    <tag k="highway" v="primary"/>
+    <tag k="name" v="Quote &quot;Road&quot; \ Ä"/>
+  </way>
+  <way id="2" version="1" timestamp="2024-05-01T12:00:00Z" uid="42" user="bahn" changeset="1002">
+    <nd ref="3"/>
+    <nd ref="4"/>
+    <tag k="railway" v="rail"/>
+  </way>
+  <way id="3" version="1" timestamp="2024-05-01T12:00:00Z" uid="11" user="mapper" changeset="100">
+    <nd ref="5"/>
+    <nd ref="6"/>
+    <tag k="highway" v="secondary"/>
+  </way>
+  <way id="4" version="1" timestamp="2024-05-01T12:00:00Z" uid="11" user="mapper" changeset="100">
+    <nd ref="7"/>
+    <nd ref="8"/>
+    <tag k="highway" v="tertiary"/>
+  </way>
+  <way id="5" version="1" timestamp="2024-05-01T12:00:00Z" uid="11" user="mapper" changeset="100">
+    <nd ref="9"/>
+    <nd ref="10"/>
+    <tag k="highway" v="track"/>
+  </way>
+  <way id="6" version="1" timestamp="2024-05-01T12:00:00Z" uid="11" user="mapper" changeset="100">
+    <nd ref="11"/>
+    <nd ref="12"/>
+    <tag k="waterway" v="stream"/>
+  </way>
+  <way id="7" version="1" timestamp="2024-05-01T12:00:00Z" uid="11" user="mapper" changeset="100">
+    <nd ref="17"/>
+    <nd ref="18"/>
+    <nd ref="19"/>
+    <tag k="highway" v="residential"/>
+  </way>
+  <way id="8" version="1" timestamp="2024-05-01T12:00:00Z" uid="11" user="mapper" changeset="100">
+    <nd ref="18"/>
+    <nd ref="20"/>
+    <tag k="highway" v="service"/>
+  </way>
+  <way id="9" version="1" timestamp="2024-05-01T12:00:00Z" uid="11" user="mapper" changeset="100">
+    <nd ref="21"/>
+    <nd ref="22"/>
+    <tag k="boundary" v="administrative"/>
+  </way>
+  <way id="10" version="1" timestamp="2024-05-01T12:00:00Z" uid="11" user="mapper" changeset="100">
+    <nd ref="23"/>
+    <nd ref="24"/>
+    <tag k="highway" v="path"/>
+  </way>
+  <way id="11" version="1" timestamp="2024-05-01T12:00:00Z" uid="11" user="mapper" changeset="100">
+    <nd ref="25"/>
+    <nd ref="26"/>
+  </way>
+  <way id="12" version="1" timestamp="2024-05-01T12:00:00Z" uid="11" user="mapper" changeset="100">
+    <nd ref="27"/>
+    <nd ref="28"/>
+    <tag k="highway" v="footway"/>
+  </way>
+  <way id="13" version="1" timestamp="2024-05-01T12:00:00Z" uid="11" user="mapper" changeset="100">
+    <nd ref="29"/>
+    <nd ref="30"/>
+    <nd ref="31"/>
+    <nd ref="32"/>
+    <nd ref="33"/>
+    <tag k="highway" v="unclassified"/>
+  </way>
+  <way id="14" version="1" timestamp="2024-05-01T12:00:00Z" uid="11" user="mapper" changeset="100">
+    <nd ref="37"/>
+    <nd ref="38"/>
+    <tag k="highway" v="trunk"/>
+  </way>
+  <way id="15" version="1" timestamp="2024-05-01T12:00:00Z" uid="11" user="mapper" changeset="100">
+    <nd ref="34"/>
+    <nd ref="35"/>
+    <nd ref="36"/>
+    <tag k="highway" v="motorway"/>
+  </way>
+  <way id="16" version="1" timestamp="2024-05-01T12:00:00Z" uid="11" user="mapper" changeset="100">
+    <nd ref="39"/>
+    <nd ref="40"/>
+    <tag k="landuse" v="forest"/>
+  </way>
+  <way id="17" version="1" timestamp="2024-05-01T12:00:00Z" uid="11" user="mapper" changeset="100">
+    <nd ref="41"/>
+    <nd ref="42"/>
+    <tag k="highway" v="bridleway"/>
+  </way>
+  <way id="18" version="1" timestamp="2024-05-01T12:00:00Z" uid="11" user="mapper" changeset="100">
+    <nd ref="43"/>
+    <nd ref="99999"/>
+    <tag k="highway" v="proposed"/>
+  </way>
+  <relation id="1" version="1" timestamp="2024-05-01T12:00:00Z" uid="11" user="mapper" changeset="100">
+    <member type="way" ref="11" role=""/>
+    <tag k="type" v="multipolygon"/>
+    <tag k="boundary" v="nature_reserve"/>
+  </relation>
+  <relation id="2" version="1" timestamp="2024-05-01T12:00:00Z" uid="11" user="mapper" changeset="100">
+    <member type="way" ref="10" role=""/>
+    <tag k="type" v="route"/>
+    <tag k="route" v="hiking"/>
+  </relation>
+</osm>

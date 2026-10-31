@@ -34,3 +34,17 @@ include_directories("${OSMIUM_INCLUDE_DIRS}")
 include_directories(${NLOHMANN_JSON_INCLUDE_DIRS})
 include_directories(${Boost_INCLUDE_DIRS})
 target_link_libraries(linecrossing ${OSMIUM_LIBRARIES} ${Boost_LIBRARIES} SQLite::SQLite3)
+
+option(ENABLE_COVERAGE "Build with gcov/llvm-cov instrumentation" OFF)
+option(ENABLE_MULL "Build tests with the mull mutation testing plugin (needs clang)" OFF)
+option(BUILD_TESTING "Build unit tests" ON)
+
+if(ENABLE_COVERAGE)
+  target_compile_options(linecrossing PRIVATE --coverage -O0)
+  target_link_options(linecrossing PRIVATE --coverage)
+endif()
+
+if(BUILD_TESTING)
+  include(CTest)
+  add_subdirectory(tests)
+endif()
