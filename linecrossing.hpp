@@ -87,7 +87,21 @@ using RTree = bgi::rtree<Segment, bgi::linear<16, 4>, SegmentGetter>;
 struct WayNodes {
 	std::uint64_t id = 0;
 	std::vector<std::uint64_t> nodes;
+	std::int8_t layer = 0; // layer tag, 0 if absent/invalid
 };
+
+// OSM layer tag value; absent or non-numeric = 0
+inline std::int8_t parse_layer(const char* v) {
+	if (!v) {
+		return 0;
+	}
+	char* end = nullptr;
+	const long l = std::strtol(v, &end, 10);
+	if (end == v || *end != '\0') {
+		return 0;
+	}
+	return static_cast<std::int8_t>(std::max(-127L, std::min(127L, l)));
+}
 
 struct Crossing {
 	std::uint64_t way1;
@@ -233,6 +247,7 @@ public:
 	std::size_t num_touch = 0;     // intersections rejected by the angle threshold (statistic)
 	std::size_t num_nodeskip = 0;  // rejected because of shared nodes (statistic)
 	std::size_t num_parallel = 0;  // rejected as near-parallel/collinear (statistic)
+	std::size_t num_layer = 0;     // rejected because ways are on different layers (statistic)
 
 	std::size_t num_excluded = 0;   // rejected by the exclude tag key filter (statistic)
 	std::size_t num_excluded_rel = 0; // rejected as member of a relation with excluded tag keys (statistic)
@@ -288,6 +303,7 @@ public:
 
 		WayNodes wn;
 		wn.id = way.id();
+		wn.layer = parse_layer(way.tags().get_value_by_key("layer"));
 		wn.nodes.reserve(way.nodes().size());
 		for (const auto& nr : way.nodes()) {
 			wn.nodes.push_back(nr.positive_ref());
@@ -335,6 +351,10 @@ public:
 				}
 				if (angle >= threshold) { // also filters near-parallel overlaps
 					++num_touch;
+					continue;
+				}
+				if (ways[way_idx].layer != ways[t.way].layer) { // e.g. bridge over road
+					++num_layer;
 					continue;
 				}
 				const bool shared = ways_share_node(ways[way_idx], ways[t.way]);

@@ -86,6 +86,7 @@ int main(int argc, char* argv[]) {
 	          << "skipped by angle:" << lineindex.num_touch << '\n'
 	          << "skipped parallel:" << lineindex.num_parallel << '\n'
 	          << "skipped shared:  " << lineindex.num_nodeskip << '\n'
+	          << "skipped layer:   " << lineindex.num_layer << '\n'
 	          << "ways excluded:   " << lineindex.num_excluded << '\n'
 	          << "ways excl rel:   " << lineindex.num_excluded_rel << '\n'
 	          << "read:            " << secs(start, read_done) << " s\n"

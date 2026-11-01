@@ -50,7 +50,7 @@ exclusion only depends on the relation's tags and its member list.
 Single streaming read. `osmium::handler::NodeLocationsForWays` (FlexMem index)
 resolves node coordinates; the `LineIndex` handler does the rest per way:
 
-* store the minimal way record `WayNodes { id, node refs }` - node refs are only
+* store the minimal way record `WayNodes { id, node refs, layer }` - node refs are only
   needed for the shared-node exclusion later;
 * for every node pair build a `Segment { x1, y1, x2, y2, way_index }`;
 * **query the R-tree for intersecting segments, then insert the new segment**.
@@ -73,9 +73,10 @@ Applied cheapest first (see `LineIndex::way`):
    adjacency class: shared borders of adjacent areas, duplicated digitized borders,
    overlapping outlines. Filtered *before* the expensive shared-node check.
 4. `acute_angle` at or above the threshold `-a` (default 15°)
-5. ways sharing a common node (`ways_share_node`) - an ordinary junction, not a
+5. ways on different `layer` tag values (absent = 0) - bridge/tunnel, not a crossing
+6. ways sharing a common node (`ways_share_node`) - an ordinary junction, not a
    crossing; checked via a small hash set built from the way with fewer nodes
-6. deduplication per (way pair, crossing point rounded to a ~0.1 m grid) - several
+7. deduplication per (way pair, crossing point rounded to a ~0.1 m grid) - several
    segment pairs can report the same physical crossing, e.g. when the crossing point
    coincides with a node of one way
 

@@ -74,6 +74,37 @@ std::unique_ptr<Analysis> run(const Options& opt) {
 	return res;
 }
 
+// two ~10 degree crossing ways with the given layer tag values ("" = no tag)
+std::unique_ptr<Analysis> run_layers(const std::string& l1, const std::string& l2) {
+	const TmpFile f{"layers.osm.xml"};
+	{
+		std::ofstream o(f.path);
+		const auto node = [&](int id, const char* lat, const char* lon) {
+			o << "<node id=\"" << id << "\" lat=\"" << lat << "\" lon=\"" << lon
+			  << "\" version=\"1\" timestamp=\"2024-05-01T12:00:00Z\" uid=\"1\" user=\"u\" changeset=\"1\"/>\n";
+		};
+		const auto way = [&](int id, int a, int b, const std::string& layer) {
+			o << "<way id=\"" << id << "\" version=\"1\" timestamp=\"2024-05-01T12:00:00Z\" uid=\"1\" user=\"u\" changeset=\"1\">"
+			  << "<nd ref=\"" << a << "\"/><nd ref=\"" << b << "\"/><tag k=\"highway\" v=\"primary\"/>";
+			if (!layer.empty()) {
+				o << "<tag k=\"layer\" v=\"" << layer << "\"/>";
+			}
+			o << "</way>\n";
+		};
+		o << "<?xml version=\"1.0\"?>\n<osm version=\"0.6\">\n";
+		node(1, "52.0000000", "7.9967515");
+		node(2, "52.0000000", "8.0032485");
+		node(3, "51.9996527", "7.9968008");
+		node(4, "52.0003473", "8.0031992");
+		way(1, 1, 2, l1);
+		way(2, 3, 4, l2);
+		o << "</osm>\n";
+	}
+	auto res = std::make_unique<Analysis>();
+	analyze(osmium::io::File{f.path}, Options{}, *res);
+	return res;
+}
+
 } // namespace
 
 TEST_CASE("mix64 is deterministic and spreads", "[hash]") {
@@ -590,4 +621,33 @@ TEST_CASE("write_spatialite overwrites an existing file", "[output]") {
 	CHECK_THAT(sqlite3_column_double(st, 1), WithinAbs(5.0, 1e-9));
 	sqlite3_finalize(st);
 	sqlite3_close(db);
+}
+
+TEST_CASE("parse_layer", "[tags]") {
+	CHECK(parse_layer(nullptr) == 0);
+	CHECK(parse_layer("") == 0);
+	CHECK(parse_layer("1") == 1);
+	CHECK(parse_layer("-1") == -1);
+	CHECK(parse_layer("+2") == 2);
+	CHECK(parse_layer("abc") == 0);
+	CHECK(parse_layer("1x") == 0);
+	CHECK(parse_layer("1000") == 127);
+	CHECK(parse_layer("-1000") == -127);
+}
+
+TEST_CASE("ways on different layers do not cross", "[integration]") {
+	SECTION("same layer is reported") {
+		for (const auto& l : {std::pair<const char*, const char*>{"", ""}, {"", "0"}, {"1", "1"}, {"-1", "-1"}, {"x", ""}}) {
+			const auto res = run_layers(l.first, l.second);
+			CHECK(res->lineindex.crossings.size() == 1);
+			CHECK(res->lineindex.num_layer == 0);
+		}
+	}
+	SECTION("different layers are skipped") {
+		for (const auto& l : {std::pair<const char*, const char*>{"1", ""}, {"", "-1"}, {"0", "1"}, {"1", "2"}}) {
+			const auto res = run_layers(l.first, l.second);
+			CHECK(res->lineindex.crossings.empty());
+			CHECK(res->lineindex.num_layer == 1);
+		}
+	}
 }
